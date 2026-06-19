@@ -171,6 +171,113 @@ async def create_session(case_file_paths: list[str]):
         "session_id": session.session_id,
         "room": session.room_name,
         "token": token,
+        "case_title": context.case_id,
+        "exhibits": [{"id": e.id, "description": e.description} for e in context.exhibits] if context.exhibits else [],
+    }
+
+
+@app.get("/sessions")
+async def list_sessions(status: str | None = None):
+    """List all sessions, optionally filtered by status."""
+    mgr = get_manager()
+    from backend.orchestrator.session_manager import SessionStatus
+    status_filter = None
+    if status:
+        try:
+            status_filter = SessionStatus(status.upper())
+        except ValueError:
+            raise HTTPException(400, f"Invalid status: {status}")
+    sessions = mgr.list_sessions(status=status_filter)
+    return [
+        {
+            "session_id": s.session_id,
+            "status": s.status.name.lower(),
+            "turn_number": s.turn_number,
+            "case_title": s.case_context.case_id if s.case_context else "",
+        }
+        for s in sessions
+    ]
+
+
+@app.get("/session/{session_id}")
+async def get_session(session_id: str):
+    """Get session details without finalizing."""
+    mgr = get_manager()
+    try:
+        session = mgr.get_session(session_id)
+    except KeyError:
+        raise HTTPException(404, f"Session {session_id} not found")
+    return {
+        "session_id": session.session_id,
+        "status": session.status.name.lower(),
+        "turn_number": session.turn_number,
+        "case_title": session.case_context.case_id if session.case_context else "",
+        "exhibits": [{"id": e.id, "description": e.description} for e in session.case_context.exhibits] if session.case_context and session.case_context.exhibits else [],
+    }
+
+
+@app.post("/session/{session_id}/pause")
+async def pause_session(session_id: str):
+    """Pause an active session."""
+    mgr = get_manager()
+    try:
+        mgr.pause_session(session_id)
+        session = mgr.get_session(session_id)
+        return {"session_id": session_id, "status": session.status.name.lower()}
+    except KeyError:
+        raise HTTPException(404, f"Session {session_id} not found")
+    except RuntimeError as exc:
+        raise HTTPException(409, str(exc))
+
+
+@app.post("/session/{session_id}/resume")
+async def resume_session(session_id: str):
+    """Resume a paused session."""
+    mgr = get_manager()
+    try:
+        mgr.resume_session(session_id)
+        session = mgr.get_session(session_id)
+        return {"session_id": session_id, "status": session.status.name.lower()}
+    except KeyError:
+        raise HTTPException(404, f"Session {session_id} not found")
+    except RuntimeError as exc:
+        raise HTTPException(409, str(exc))
+
+
+@app.post("/session/{session_id}/destroy")
+async def destroy_session(session_id: str):
+    """Destroy a session and release its resources."""
+    mgr = get_manager()
+    try:
+        await mgr.destroy_session(session_id)
+        return {"session_id": session_id, "status": "destroyed"}
+    except KeyError:
+        raise HTTPException(404, f"Session {session_id} not found")
+
+
+@app.get("/session/{session_id}/snapshot")
+async def scorecard_snapshot(session_id: str):
+    """Get the current scorecard without finalizing the session."""
+    mgr = get_manager()
+    try:
+        scorecard = mgr.scorecard_snapshot(session_id)
+    except KeyError:
+        raise HTTPException(404, f"Session {session_id} not found")
+    return {
+        "session_id": scorecard.session_id,
+        "duration_sec": scorecard.duration_sec,
+        "credibility_risk": scorecard.credibility_risk,
+        "entries": [
+            {
+                "type": e.type,
+                "description": e.description,
+                "severity": e.severity,
+                "timestamp_sec": e.timestamp_sec,
+                "witness_answer": e.witness_answer,
+                "exhibit_ref": e.exhibit_ref,
+            }
+            for e in scorecard.entries
+        ],
     }
 
 
