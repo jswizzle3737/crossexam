@@ -1,0 +1,3 @@
+{"turn": 1, "timestamp": "2026-06-19T02:55:48.327825+00:00", "speaker": "witness", "text": "I was at the corner of King and Queen at 8:15 PM.", "metadata": {"pause_ms": 1500}}
+{"turn": 1, "timestamp": "2026-06-19T02:55:48.331334+00:00", "speaker": "examiner", "text": "I put it to you that you did not see the accused at 8:15 PM.", "metadata": {}}
+{"turn": 2, "timestamp": "2026-06-19T02:55:48.335334+00:00", "speaker": "witness", "text": "I don't recall exactly what he was wearing.", "metadata": {"pause_ms": 1200, "partial": true}}

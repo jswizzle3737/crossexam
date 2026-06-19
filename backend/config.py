@@ -42,6 +42,11 @@ class Settings:
         if not self.api_keys:
             self.api_keys = {"dev-key"}
 
+        # OpenRouter (LLM inference)
+        self.openrouter_api_key: str = os.getenv("OPENROUTER_API_KEY", "")
+        self.openrouter_base_url: str = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+        self.openrouter_model: str = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+
         # CORS
         raw_origins = os.getenv("CORS_ORIGINS", "*")
         self.cors_origins: list[str] = [o.strip() for o in raw_origins.split(",") if o.strip()]

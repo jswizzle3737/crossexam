@@ -406,7 +406,7 @@ class SessionManager:
             raise RuntimeError(f"Session {session_id} is {session.status.name}")
 
         session.turn_number += 1
-        session.pending_transcript += (" " if session.pending_transcript else "") + transcript
+        session.pending_transcript = (session.pending_transcript.strip() + " " + transcript.strip()).strip()
 
         # Detect turn boundary
         is_complete = session.turn_detector.is_turn_complete(
@@ -418,15 +418,11 @@ class SessionManager:
         if is_complete:
             # Generate next question via examiner agent
             case_dict = (
-                session.case_context.dict_by_alias()
-                if hasattr(session.case_context, "dict_by_alias")
-                else (
-                    session.case_context.dict()
-                    if hasattr(session.case_context, "dict")
-                    else {}
-                )
+                session.case_context.to_dict()
+                if hasattr(session.case_context, "to_dict")
+                else {}
             )
-            next_question = session.examiner_agent.generate_question(
+            next_question = await session.examiner_agent.generate_question_async(
                 session.pending_transcript, case_dict
             )
 
@@ -475,7 +471,7 @@ class SessionManager:
 
     # ── Manual turn override ────────────────────────────────────────────
 
-    def force_turn(
+    async def force_turn(
         self,
         session_id: str,
         override: TurnOverride,
@@ -508,7 +504,7 @@ class SessionManager:
                 else {}
             )
         )
-        next_question = session.examiner_agent.generate_question(
+        next_question = await session.examiner_agent.generate_question_async(
             transcript, case_dict
         )
 

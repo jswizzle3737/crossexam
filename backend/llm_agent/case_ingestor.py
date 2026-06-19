@@ -26,6 +26,20 @@ class CaseContext:
     witness_statements: List[WitnessStatement] = field(default_factory=list)
     contradictions: List[dict] = field(default_factory=list)
 
+    def to_dict(self) -> dict:
+        return {
+            "case_id": self.case_id,
+            "exhibits": [
+                {"id": e.id, "description": e.description, "source_file": e.source_file}
+                for e in self.exhibits
+            ],
+            "witness_statements": [
+                {"witness_id": s.witness_id, "statement_text": s.statement_text, "source": s.source}
+                for s in self.witness_statements
+            ],
+            "contradictions": self.contradictions,
+        }
+
 
 class CaseIngestor:
     def ingest(self, file_paths: List[str]) -> CaseContext:

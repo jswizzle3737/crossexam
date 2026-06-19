@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+import aiofiles
+
 
 class TranscriptLog:
     def __init__(self, session_dir: Path):
@@ -23,5 +25,5 @@ class TranscriptLog:
             "metadata": metadata or {},
         }
         async with self._lock:
-            with open(self._log_path, "a") as f:
-                f.write(json.dumps(entry) + "\n")
+            async with aiofiles.open(self._log_path, "a") as f:
+                await f.write(json.dumps(entry) + "\n")
