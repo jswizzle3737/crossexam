@@ -61,3 +61,6 @@
 {"turn": 1, "timestamp": "2026-06-19T04:00:22.769000+00:00", "speaker": "witness", "text": "I saw him", "metadata": {"pause_ms": 100, "partial": true}}
 {"turn": 2, "timestamp": "2026-06-19T04:00:22.774513+00:00", "speaker": "witness", "text": " at the scene", "metadata": {"pause_ms": 100, "partial": true}}
 {"turn": 3, "timestamp": "2026-06-19T04:00:22.779511+00:00", "speaker": "witness", "text": " that night", "metadata": {"pause_ms": 100, "partial": true}}
+{"turn": 1, "timestamp": "2026-06-19T04:12:50.094559+00:00", "speaker": "witness", "text": "I saw him", "metadata": {"pause_ms": 100, "partial": true}}
+{"turn": 2, "timestamp": "2026-06-19T04:12:50.101564+00:00", "speaker": "witness", "text": " at the scene", "metadata": {"pause_ms": 100, "partial": true}}
+{"turn": 3, "timestamp": "2026-06-19T04:12:50.104584+00:00", "speaker": "witness", "text": " that night", "metadata": {"pause_ms": 100, "partial": true}}

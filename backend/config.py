@@ -54,6 +54,7 @@ class Settings:
             self.cors_origins = ["*"]
 
         self.log_dir: Path = Path(os.getenv("WITNESS_PREP_LOG_DIR", str(PROJECT_ROOT / "data" / "sessions")))
+        self.data_dir: Path = PROJECT_ROOT / "data"
         self.frontend_dir: Path = PROJECT_ROOT / "frontend"
 
 

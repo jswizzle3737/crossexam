@@ -15,7 +15,7 @@ from collections import defaultdict
 from contextlib import asynccontextmanager
 from time import monotonic
 
-from fastapi import FastAPI, HTTPException, Request, WebSocket
+from fastapi import FastAPI, HTTPException, Request, UploadFile, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -148,6 +148,33 @@ async def health():
     except Exception:
         ok = False
     return {"status": "ok" if ok else "degraded", "gateway": ok}
+
+
+@app.post("/case/upload")
+async def upload_case(file: UploadFile):
+    """Upload a case file (txt, pdf, docx). Saves, ingests, returns case context."""
+    import aiofiles
+    import os
+    upload_dir = settings.data_dir / "uploads"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    safe_name = file.filename.replace("\\", "_").replace("/", "_")
+    save_path = upload_dir / safe_name
+
+    content = await file.read()
+    async with aiofiles.open(save_path, "wb") as f:
+        await f.write(content)
+
+    # Ingest
+    context = ingestor.ingest([str(save_path)])
+    return {
+        "filename": safe_name,
+        "path": str(save_path),
+        "case_id": context.case_id,
+        "exhibits": [{"id": e.id, "description": e.description} for e in context.exhibits],
+        "statements": [{"witness": s.witness_id, "text": s.statement_text[:200]} for s in context.witness_statements],
+        "statement_count": len(context.witness_statements),
+    }
 
 
 @app.post("/session/create")

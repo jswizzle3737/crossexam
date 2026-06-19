@@ -3,52 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Witness Prep — Cross-Examination</title>
+<title>Witness Prep — Voice Cross-Examination</title>
 <style>
   :root {
-    --bg: #0d0d0d;
-    --surface: #1a1a1a;
-    --border: #2a2a2a;
-    --text: #e0e0e0;
-    --text-dim: #666;
-    --accent: #c8a84e;
-    --accent-dim: #8a7030;
-    --red: #cc3333;
-    --green: #338833;
-    --orange: #cc8800;
+    --bg: #0d0d0d; --surface: #1a1a1a; --surface2: #222;
+    --border: #2a2a2a; --text: #e0e0e0; --text-dim: #666;
+    --accent: #c8a84e; --accent-dim: #8a7030;
+    --red: #cc3333; --green: #338833; --orange: #cc8800;
     --radius: 8px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    font-size: 14px;
+    background: var(--bg); color: var(--text); height: 100vh; font-size: 14px;
+    display: flex; flex-direction: column;
   }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+  /* Top bar */
   .topbar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 16px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px; padding: 8px 16px;
+    background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
   .topbar h1 { font-size: 15px; font-weight: 700; color: var(--accent); letter-spacing: 1px; margin-right: auto; }
-  .topbar label { font-size: 11px; color: var(--text-dim); }
   .topbar input[type="text"] {
     background: var(--bg); border: 1px solid var(--border); color: var(--text);
-    padding: 5px 8px; border-radius: 4px; font-size: 12px; width: 160px; font-family: monospace;
+    padding: 5px 8px; border-radius: 4px; font-size: 12px; width: 140px; font-family: monospace;
   }
-  .topbar input[type="text"]:focus { outline: none; border-color: var(--accent); }
-
   .badge {
     font-size: 10px; padding: 2px 8px; border-radius: 99px; background: var(--border);
     color: var(--text-dim); white-space: nowrap;
@@ -57,39 +40,57 @@
   .badge.waiting { background: var(--accent-dim); color: #fff; }
   .badge.error { background: var(--red); color: #fff; }
   .badge.paused { background: var(--orange); color: #000; }
-  .badge.completed { background: #555; color: #ccc; }
 
   .main { display: flex; flex: 1; overflow: hidden; }
 
-  /* Left sidebar — session list */
-  .leftbar {
-    width: 260px; background: var(--surface); border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; flex-shrink: 0;
+  /* Upload view */
+  #uploadView {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 20px; padding: 40px;
   }
-  .leftbar-header {
-    padding: 12px 14px 8px; border-bottom: 1px solid var(--border); display: flex;
-    align-items: center; justify-content: space-between; gap: 8px;
+  #uploadView.hidden { display: none; }
+  .dropzone {
+    width: 100%; max-width: 520px; border: 2px dashed var(--border);
+    border-radius: 12px; padding: 60px 40px; text-align: center;
+    cursor: pointer; transition: all 0.2s;
   }
-  .leftbar-header h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); }
-  .session-list { flex: 1; overflow-y: auto; padding: 6px; }
-  .session-item {
-    padding: 10px 12px; border-radius: 6px; cursor: pointer; margin-bottom: 2px;
-    border: 1px solid transparent; transition: all 0.1s;
-  }
-  .session-item:hover { background: var(--bg); }
-  .session-item.active { background: var(--bg); border-color: var(--accent-dim); }
-  .session-item .si-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
-  .session-item .si-meta { font-size: 11px; color: var(--text-dim); display: flex; gap: 8px; align-items: center; }
-  .session-item .si-meta .s { font-size: 9px; padding: 1px 5px; border-radius: 4px; }
+  .dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: rgba(200,168,78,0.05); }
+  .dropzone .dz-icon { font-size: 48px; margin-bottom: 12px; }
+  .dropzone .dz-text { font-size: 16px; font-weight: 500; }
+  .dropzone .dz-hint { font-size: 12px; color: var(--text-dim); margin-top: 8px; }
+  .file-input { display: none; }
+  #uploadStatus { font-size: 13px; color: var(--text-dim); max-width: 500px; text-align: center; }
 
-  /* Chat */
-  .chat { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  /* Case review */
+  #caseReview {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85); display: flex; align-items: center;
+    justify-content: center; z-index: 100;
+  }
+  #caseReview.hidden { display: none; }
+  .cr-modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh;
+    overflow-y: auto; padding: 24px;
+  }
+  .cr-modal h2 { font-size: 18px; margin-bottom: 16px; color: var(--accent); }
+  .cr-item { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .cr-item:last-child { border-bottom: none; }
+  .cr-stats { display: flex; gap: 16px; margin-bottom: 16px; }
+  .cr-stat { background: var(--surface2); padding: 10px 16px; border-radius: var(--radius); text-align: center; flex: 1; }
+  .cr-stat .num { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .cr-stat .lbl { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+  /* Chat view */
+  #chatView { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  #chatView.hidden { display: none; }
   .chat-header {
     padding: 10px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0;
     display: flex; align-items: center; gap: 10px;
   }
   .chat-header .ch-title { font-size: 13px; font-weight: 600; }
-  .chat-header .ch-controls { margin-left: auto; display: flex; gap: 6px; }
+  .chat-header .ch-controls { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+
   .messages { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
   .msg { max-width: 78%; padding: 10px 14px; border-radius: var(--radius); font-size: 14px; line-height: 1.5; animation: fadeIn 0.2s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
@@ -97,8 +98,7 @@
   .msg.examiner { align-self: flex-start; background: #1a1a2a; border: 1px solid #3a3a5a; color: #b0b0e0; }
   .msg.system { align-self: center; background: transparent; color: var(--text-dim); font-size: 12px; text-align: center; max-width: 100%; }
   .msg .mlabel { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; opacity: 0.6; }
-  .msg .mtime { font-size: 10px; color: var(--text-dim); margin-top: 4px; opacity: 0.5; }
-
+  .msg .mic-badge { display: inline-block; font-size: 10px; margin-left: 6px; }
   .typing { align-self: flex-start; padding: 8px 14px; display: flex; gap: 4px; }
   .typing span { width: 6px; height: 6px; background: var(--accent-dim); border-radius: 50%; animation: bounce 1.2s infinite; }
   .typing span:nth-child(2) { animation-delay: 0.2s; }
@@ -107,7 +107,7 @@
 
   .inputbar {
     display: flex; gap: 8px; padding: 10px 20px; background: var(--surface);
-    border-top: 1px solid var(--border); flex-shrink: 0;
+    border-top: 1px solid var(--border); flex-shrink: 0; align-items: flex-end;
   }
   .inputbar textarea {
     flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text);
@@ -127,250 +127,373 @@
   button.sm { padding: 5px 10px; font-size: 11px; }
   button.danger { background: var(--red); color: #fff; }
   button.secondary { background: var(--border); color: var(--text); }
-  button.ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+  button.ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); padding: 6px 10px; }
   button.ghost:hover { border-color: var(--accent-dim); color: var(--text); }
+  button.active-mic { background: var(--red); color: #fff; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
 
-  /* Right sidebar */
   .rightbar {
-    width: 320px; background: var(--surface); border-left: 1px solid var(--border);
+    width: 300px; background: var(--surface); border-left: 1px solid var(--border);
     display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
   }
-  .rb-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
-  .rb-section h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 8px; }
-  .stat-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; }
+  .rb-section { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .rb-section h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 6px; }
+  .stat-row { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
   .stat-row .val { color: var(--accent); font-family: monospace; font-size: 12px; }
-  .exhibit-item { font-size: 12px; padding: 4px 0; color: var(--text-dim); }
+  .exhibit-item { font-size: 11px; padding: 3px 0; color: var(--text-dim); }
   .exhibit-item strong { color: var(--accent-dim); }
-
-  .scorecard-entry { font-size: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .scorecard-entry { font-size: 11px; padding: 6px 0; border-bottom: 1px solid var(--border); }
   .scorecard-entry:last-child { border-bottom: none; }
-  .sev { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-bottom: 3px; }
+  .sev { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 600; }
   .sev.critical { background: var(--red); color: #fff; }
   .sev.moderate { background: var(--orange); color: #000; }
   .sev.minor { background: var(--border); color: var(--text-dim); }
-
-  .empty-state { color: var(--text-dim); font-size: 12px; text-align: center; padding: 30px 16px; }
+  .empty-state { color: var(--text-dim); font-size: 12px; text-align: center; padding: 20px 14px; }
   .hidden { display: none !important; }
   .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .flex { display: flex; }
-  .gap-2 { gap: 4px; }
-  .gap-4 { gap: 8px; }
-  .items-center { align-items: center; }
-  .mt-2 { margin-top: 4px; }
-  .w-full { width: 100%; }
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <h1>⚖ WITNESS PREP</h1>
-  <label>Token</label>
+  <span id="caseBadge" class="badge hidden">No case loaded</span>
+  <button id="newCaseBtn" class="ghost sm hidden">📄 New Case</button>
+  <button id="uploadBtnHeader" class="ghost sm hidden">Upload</button>
+  <label style="font-size:11px;color:var(--text-dim);margin-left:auto">Token</label>
   <input type="text" id="tokenInput" value="dev-key" spellcheck="false">
-  <span id="globalStatus" class="badge">ready</span>
-  <button id="createBtn" class="secondary sm">+ New Session</button>
+  <span id="statusBadge" class="badge">ready</span>
 </div>
 
 <div class="main">
-  <!-- Left sidebar: session list -->
-  <div class="leftbar">
-    <div class="leftbar-header">
-      <h3>Sessions</h3>
-      <span id="sessionCount" style="font-size:11px;color:var(--text-dim)">0</span>
+
+  <!-- Upload View -->
+  <div id="uploadView">
+    <div class="dropzone" id="dropzone">
+      <div class="dz-icon">📂</div>
+      <div class="dz-text">Drop court case files here</div>
+      <div class="dz-hint">Supports .txt, .pdf, .docx — police reports, witness statements, evidence logs</div>
     </div>
-    <div class="session-list" id="sessionList">
-      <div class="empty-state">No sessions yet.<br>Click + New Session to begin.</div>
+    <input type="file" id="fileInput" class="file-input" accept=".txt,.pdf,.docx,.md">
+    <div id="uploadStatus"></div>
+    <div id="recentCases" class="hidden" style="width:100%;max-width:520px">
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:8px">Previously uploaded:</div>
+      <div id="recentList"></div>
     </div>
   </div>
 
-  <!-- Chat -->
-  <div class="chat">
-    <div class="chat-header" id="chatHeader">
-      <span class="ch-title" id="chatTitle">Select a session</span>
-      <span id="chatStatus" class="badge">—</span>
-      <div class="ch-controls" id="chatControls" style="display:none">
-        <button id="pauseBtn" class="ghost sm" title="Pause">⏸</button>
+  <!-- Case Review Modal -->
+  <div id="caseReview" class="hidden">
+    <div class="cr-modal">
+      <h2>📋 Case Digested</h2>
+      <div class="cr-stats">
+        <div class="cr-stat"><div class="num" id="crStatements">0</div><div class="lbl">Statements</div></div>
+        <div class="cr-stat"><div class="num" id="crExhibits">0</div><div class="lbl">Exhibits</div></div>
+        <div class="cr-stat"><div class="num" id="crContradictions">0</div><div class="lbl">Contradictions</div></div>
+      </div>
+      <h3 style="font-size:12px;color:var(--text-dim);margin-bottom:8px">Extracted Exhibits</h3>
+      <div id="crExhibitList"></div>
+      <h3 style="font-size:12px;color:var(--text-dim);margin:12px 0 8px">Witness Statements</h3>
+      <div id="crStatementList"></div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button id="startCrossBtn" style="flex:1">Start Cross-Examination</button>
+        <button id="dismissReviewBtn" class="secondary">Review Later</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat View -->
+  <div id="chatView" class="hidden">
+    <div class="chat-header">
+      <span class="ch-title" id="chatTitle">Cross-Examination</span>
+      <span id="sessionStatus" class="badge">—</span>
+      <div class="ch-controls">
+        <button id="micBtn" class="ghost sm" title="Toggle microphone">🎤</button>
+        <button id="speakerBtn" class="ghost sm" title="Toggle TTS">🔊</button>
+        <button id="pauseBtn" class="ghost sm hidden" title="Pause">⏸</button>
         <button id="resumeBtn" class="ghost sm hidden" title="Resume">▶</button>
-        <button id="endBtn" class="ghost sm" title="End session &amp; finalize">■</button>
-        <button id="destroyBtn" class="ghost sm danger" title="Destroy session">✕</button>
+        <button id="endBtn" class="ghost sm hidden" title="End session">■</button>
       </div>
     </div>
     <div class="messages" id="messages">
-      <div class="msg system">Create a session to begin cross-examination.</div>
+      <div class="msg system">Upload a case file to begin.</div>
     </div>
     <div class="typing hidden" id="typingIndicator"><span></span><span></span><span></span></div>
     <div class="inputbar">
-      <textarea id="answerInput" placeholder="Type witness answer..." disabled></textarea>
+      <textarea id="answerInput" placeholder="Type your answer... (or use mic)" disabled></textarea>
       <button id="sendBtn" disabled>Send</button>
     </div>
   </div>
 
-  <!-- Right sidebar: session details + scorecard -->
-  <div class="rightbar" id="rightbar">
+  <!-- Right sidebar -->
+  <div class="rightbar">
     <div class="rb-section">
       <h3>Session</h3>
       <div class="stat-row"><span>ID</span><span class="val" id="sid">—</span></div>
-      <div class="stat-row"><span>Room</span><span class="val" id="room">—</span></div>
       <div class="stat-row"><span>Status</span><span class="val" id="sstatus">—</span></div>
-      <div class="stat-row"><span>Turn</span><span class="val" id="turn">0</span></div>
+      <div class="stat-row"><span>Turn</span><span class="val" id="turnNum">0</span></div>
     </div>
-    <div class="rb-section" id="caseSection">
+    <div class="rb-section">
       <h3>Case</h3>
-      <div class="stat-row"><span>Title</span><span class="val" id="caseTitle">—</span></div>
+      <div class="stat-row"><span>File</span><span class="val" id="caseFile">—</span></div>
+      <div class="stat-row"><span>Statements</span><span class="val" id="caseStatements">0</span></div>
       <div id="exhibitList"></div>
     </div>
     <div class="rb-section">
       <h3>Scorecard</h3>
-      <div class="stat-row"><span>Risk</span><span class="val" id="risk">—</span></div>
+      <div class="stat-row"><span>Risk</span><span class="val" id="riskLevel">—</span></div>
       <div class="stat-row"><span>Entries</span><span class="val" id="entryCount">0</span></div>
-      <div id="scorecardEntries" style="margin-top:6px"></div>
+      <div id="scorecardEntries"></div>
     </div>
   </div>
 </div>
 
 <script>
-// --- State ---
+// ===== STATE =====
 let currentSessionId = null;
-let sessions = {};
+let caseData = null;
 let ws = null;
 let reconnectTimer = null;
 let reconnectAttempts = 0;
-let scorecardTimer = null;
 let turnNum = 0;
+let scorecardTimer = null;
+let micStream = null;
+let micActive = false;
+let recognition = null;
+let ttsEnabled = true;
+
 const MAX_RECONNECT = 10;
-
-// --- DOM refs ---
 const $ = id => document.getElementById(id);
+const msgArea = $('messages');
 
-// --- Helpers ---
+// ===== HELPERS =====
 function getToken() { return $('tokenInput').value.trim() || 'dev-key'; }
 
-function setGlobalStatus(text, cls) {
-  const gs = $('globalStatus');
-  gs.textContent = text;
-  gs.className = 'badge' + (cls ? ' ' + cls : '');
+function status(text, cls) {
+  const s = $('statusBadge');
+  s.textContent = text;
+  s.className = 'badge' + (cls ? ' ' + cls : '');
 }
 
-function timeStr() {
-  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-}
-
-function addMessage(role, text) {
-  const area = $('messages');
+function addMsg(role, text, opts) {
   const div = document.createElement('div');
   div.className = `msg ${role}`;
   const label = role === 'witness' ? 'Witness' : role === 'examiner' ? 'Examiner' : '';
-  div.innerHTML = (label ? `<div class="mlabel">${label}</div>` : '') + text + `<div class="mtime">${timeStr()}</div>`;
-  area.appendChild(div);
-  area.scrollTop = area.scrollHeight;
-}
+  const micIcon = opts?.fromMic ? ' 🎤' : '';
+  div.innerHTML = (label ? `<div class="mlabel">${label}${micIcon}</div>` : '') + text;
+  msgArea.appendChild(div);
+  msgArea.scrollTop = msgArea.scrollHeight;
 
-function showTyping(show) {
-  $('typingIndicator').classList.toggle('hidden', !show);
-}
-
-// --- Session list ---
-function renderSessionList() {
-  const list = $('sessionList');
-  const ids = Object.keys(sessions);
-  $('sessionCount').textContent = ids.length;
-  if (ids.length === 0) {
-    list.innerHTML = '<div class="empty-state">No sessions yet.<br>Click + New Session to begin.</div>';
-    return;
-  }
-  list.innerHTML = '';
-  for (const id of ids) {
-    const s = sessions[id];
-    const div = document.createElement('div');
-    div.className = 'session-item' + (id === currentSessionId ? ' active' : '');
-    div.dataset.sid = id;
-    const statusClass = s.status === 'active' ? 'active' : s.status === 'paused' ? 'paused' : s.status === 'completed' ? 'completed' : '';
-    div.innerHTML = `
-      <div class="si-title">${s.case_title || id.slice(0,12)}</div>
-      <div class="si-meta">
-        <span class="s" style="background:${statusClass ? 'var(--green)' : 'var(--border)'};color:${statusClass ? '#fff' : '#666'}">${s.status}</span>
-        <span>t${s.turn_number}</span>
-        <span style="font-family:monospace;font-size:10px">${id.slice(0,10)}</span>
-      </div>
-    `;
-    div.addEventListener('click', () => selectSession(id));
-    list.appendChild(div);
+  // TTS for examiner questions
+  if (role === 'examiner' && ttsEnabled && 'speechSynthesis' in window) {
+    const utter = new SpeechSynthesisUtterance(text.replace(/<[^>]*>/g, ''));
+    utter.rate = 1.0; utter.pitch = 1.0;
+    const voices = speechSynthesis.getVoices();
+    if (voices.length) utter.voice = voices.find(v => v.lang.startsWith('en')) || voices[0];
+    speechSynthesis.speak(utter);
   }
 }
 
-// --- Session selection ---
-async function selectSession(sid) {
-  if (!sid || !sessions[sid]) return;
+function showTyping(on) { $('typingIndicator').classList.toggle('hidden', !on); }
 
-  // Close old WS
-  disconnectWS();
+function timeStr() { return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
 
-  currentSessionId = sid;
-  renderSessionList();
+// ===== FILE UPLOAD =====
+const dropzone = $('dropzone');
+const fileInput = $('fileInput');
 
-  // Clear chat
-  $('messages').innerHTML = '';
-  turnNum = 0;
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) uploadFile(fileInput.files[0]);
+});
 
-  // Fetch session details
+async function uploadFile(file) {
+  if (!file) return;
+  $('uploadStatus').textContent = `Uploading ${file.name}...`;
+  $('uploadStatus').style.color = 'var(--text-dim)';
+  status('uploading...', 'waiting');
+
+  const formData = new FormData();
+  formData.append('file', file);
+
   try {
-    const resp = await fetch(`/session/${sid}?token=${getToken()}`);
-    if (resp.ok) {
-      const data = await resp.json();
-      updateSidebar(data);
-      $('chatTitle').textContent = data.case_title || sid.slice(0,16);
-      $('chatStatus').textContent = data.status;
-      $('chatStatus').className = 'badge ' + (data.status === 'active' ? 'active' : data.status === 'paused' ? 'paused' : 'completed');
-      $('chatControls').style.display = 'flex';
-      $('pauseBtn').classList.toggle('hidden', data.status !== 'active');
-      $('resumeBtn').classList.toggle('hidden', data.status !== 'paused');
-      addMessage('system', `Session <strong>${sid.slice(0,12)}</strong> — ${data.status}`);
-      if (data.status === 'active') {
-        connectWS(sid);
-      } else {
-        $('answerInput').disabled = true;
-        $('sendBtn').disabled = true;
-      }
+    const resp = await fetch(`/case/upload?token=${getToken()}`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!resp.ok) {
+      const err = await resp.json();
+      $('uploadStatus').textContent = `Upload failed: ${err.detail || resp.statusText}`;
+      $('uploadStatus').style.color = 'var(--red)';
+      status('error', 'error');
+      return;
     }
+    caseData = await resp.json();
+    status('case loaded', 'active');
+    showCaseReview(caseData);
+    // Save to localStorage for recent list
+    const recent = JSON.parse(localStorage.getItem('witness_cases') || '[]');
+    recent.unshift({name: caseData.filename, path: caseData.path, statements: caseData.statement_count, exhibits: caseData.exhibits?.length || 0});
+    localStorage.setItem('witness_cases', JSON.stringify(recent.slice(0,10)));
+    showRecentCases();
   } catch (e) {
-    addMessage('system', `Error loading session: ${e.message}`);
+    $('uploadStatus').textContent = `Error: ${e.message}`;
+    $('uploadStatus').style.color = 'var(--red)';
+    status('error', 'error');
   }
-
-  // Start scorecard polling
-  startScorecardPoll(sid);
 }
 
-function updateSidebar(data) {
-  $('sid').textContent = data.session_id;
-  $('room').textContent = sessions[data.session_id]?.room || '—';
-  $('sstatus').textContent = data.status;
-  $('turn').textContent = data.turn_number;
-  $('caseTitle').textContent = data.case_title || '—';
+function showCaseReview(data) {
+  $('crStatements').textContent = data.statement_count;
+  $('crExhibits').textContent = data.exhibits?.length || 0;
+  $('crContradictions').textContent = '0'; // MVP placeholder
+
+  const el = $('crExhibitList');
+  el.innerHTML = '';
+  if (data.exhibits?.length) {
+    for (const ex of data.exhibits) {
+      el.innerHTML += `<div class="cr-item"><strong>${ex.id}</strong>: ${ex.description}</div>`;
+    }
+  } else {
+    el.innerHTML = '<div class="cr-item" style="color:var(--text-dim)">No exhibits extracted</div>';
+  }
+
+  const sl = $('crStatementList');
+  sl.innerHTML = '';
+  if (data.statements?.length) {
+    for (const st of data.statements.slice(0, 20)) {
+      sl.innerHTML += `<div class="cr-item">“${st.text}”</div>`;
+    }
+    if (data.statements.length > 20) {
+      sl.innerHTML += `<div class="cr-item" style="color:var(--text-dim)">… and ${data.statements.length - 20} more</div>`;
+    }
+  } else {
+    sl.innerHTML = '<div class="cr-item" style="color:var(--text-dim)">No statements extracted</div>';
+  }
+
+  $('caseReview').classList.remove('hidden');
+}
+
+$('startCrossBtn').addEventListener('click', async () => {
+  $('caseReview').classList.add('hidden');
+  await startSession(caseData.path);
+});
+
+$('dismissReviewBtn').addEventListener('click', () => {
+  $('caseReview').classList.add('hidden');
+  showChatView();
+  addMsg('system', 'Case loaded. Start cross-examination when ready.');
+  $('chatTitle').textContent = caseData.filename;
+  setupCaseSidebar(caseData);
+  $('newCaseBtn').classList.remove('hidden');
+  $('uploadBtnHeader').classList.remove('hidden');
+});
+
+function showRecentCases() {
+  const recent = JSON.parse(localStorage.getItem('witness_cases') || '[]');
+  if (!recent.length) return;
+  $('recentCases').classList.remove('hidden');
+  const rl = $('recentList');
+  rl.innerHTML = '';
+  for (const r of recent) {
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:6px 10px;cursor:pointer;border-radius:4px;font-size:12px';
+    div.innerHTML = `<span style="color:var(--accent-dim)">${r.name}</span> — ${r.statements} statements, ${r.exhibits} exhibits`;
+    div.addEventListener('click', async () => {
+      // Re-load this case
+      status('reloading...', 'waiting');
+      try {
+        const resp = await fetch(`/case/upload?token=${getToken()}`, {
+          method: 'POST',
+          body: (() => { const fd = new FormData(); fd.append('file', new File([''], r.name)); return fd; })(),
+        });
+        // Since we can't re-upload from path, just show the stored data
+        caseData = r;
+        showCaseReview(r);
+      } catch (e) { /* silent */ }
+    });
+    rl.appendChild(div);
+  }
+}
+
+// ===== SESSION =====
+async function startSession(filePath) {
+  status('creating session...', 'waiting');
+  try {
+    const resp = await fetch(`/session/create?token=${getToken()}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify([filePath]),
+    });
+    if (!resp.ok) {
+      const err = await resp.json();
+      addMsg('system', `Session failed: ${err.detail}`);
+      status('error', 'error');
+      return;
+    }
+    const data = await resp.json();
+    currentSessionId = data.session_id;
+    showChatView();
+    setupCaseSidebar(caseData);
+    $('sid').textContent = data.session_id.slice(0,14);
+    $('sstatus').textContent = 'active';
+    $('sstatus').className = 'badge active';
+    $('chatTitle').textContent = caseData?.filename || 'Cross-Examination';
+    $('sessionStatus').textContent = 'active';
+    $('sessionStatus').className = 'badge active';
+    $('pauseBtn').classList.remove('hidden');
+    addMsg('system', `Session started. You're being cross-examined on <strong>${caseData?.filename || 'the case'}</strong>.`);
+    connectWS(data.session_id);
+    startScorecardPoll(data.session_id);
+    $('endBtn').classList.remove('hidden');
+  } catch (e) {
+    addMsg('system', `Error: ${e.message}`);
+    status('error', 'error');
+  }
+}
+
+function showChatView() {
+  $('uploadView').classList.add('hidden');
+  $('chatView').classList.remove('hidden');
+  $('newCaseBtn').classList.remove('hidden');
+  $('caseBadge').classList.remove('hidden');
+  $('caseBadge').textContent = caseData?.filename || 'Case loaded';
+}
+
+function setupCaseSidebar(data) {
+  if (!data) return;
+  $('caseFile').textContent = data.filename || '—';
+  $('caseStatements').textContent = data.statement_count || 0;
   const el = $('exhibitList');
   el.innerHTML = '';
-  if (data.exhibits && data.exhibits.length > 0) {
+  if (data.exhibits?.length) {
     for (const ex of data.exhibits) {
       el.innerHTML += `<div class="exhibit-item"><strong>${ex.id}</strong>: ${ex.description}</div>`;
     }
-  } else {
-    el.innerHTML = '<div class="exhibit-item" style="color:var(--text-dim)">No exhibits</div>';
   }
 }
 
-// --- WebSocket ---
+// ===== WEBSOCKET =====
 function connectWS(sid) {
   if (ws) { ws.close(); ws = null; }
   const token = getToken();
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const url = `${proto}//${location.host}/session/${sid}/transcript?token=${token}`;
-  ws = new WebSocket(url);
+  ws = new WebSocket(`${proto}//${location.host}/session/${sid}/transcript?token=${token}`);
 
   ws.onopen = () => {
     $('answerInput').disabled = false;
     $('sendBtn').disabled = false;
     $('answerInput').focus();
     reconnectAttempts = 0;
-    setGlobalStatus('connected', 'active');
+    status('connected', 'active');
   };
 
   ws.onmessage = (e) => {
@@ -378,13 +501,12 @@ function connectWS(sid) {
     showTyping(false);
     if (data.type === 'question') {
       turnNum++;
-      $('turn').textContent = turnNum;
-      addMessage('examiner', data.text);
-      if (data.strategy) addMessage('system', `Strategy: ${data.strategy}`);
-      // Fetch scorecard after each question
+      $('turnNum').textContent = turnNum;
+      addMsg('examiner', data.text);
+      if (data.strategy) addMsg('system', `Strategy: ${data.strategy}`);
       setTimeout(() => refreshScorecard(currentSessionId), 500);
     } else if (data.type === 'error') {
-      addMessage('system', `Error [${data.code}]: ${data.message || ''}`);
+      addMsg('system', `Error [${data.code}]: ${data.message || ''}`);
     }
   };
 
@@ -392,21 +514,13 @@ function connectWS(sid) {
     $('answerInput').disabled = true;
     $('sendBtn').disabled = true;
     ws = null;
-    if (currentSessionId && sessions[currentSessionId]?.status === 'active') {
-      setGlobalStatus('reconnecting...', 'waiting');
+    if (currentSessionId) {
+      status('reconnecting...', 'waiting');
       scheduleReconnect(sid);
     }
   };
 
-  ws.onerror = () => {
-    setGlobalStatus('ws error', 'error');
-  };
-}
-
-function disconnectWS() {
-  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
-  reconnectAttempts = MAX_RECONNECT; // prevent auto-reconnect
-  if (ws) { ws.close(); ws = null; }
+  ws.onerror = () => status('ws error', 'error');
 }
 
 function scheduleReconnect(sid) {
@@ -418,40 +532,168 @@ function scheduleReconnect(sid) {
   }, delay);
 }
 
-// --- Scorecard ---
+function disconnectWS() {
+  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+  reconnectAttempts = MAX_RECONNECT;
+  if (ws) { ws.close(); ws = null; }
+}
+
+// ===== SEND ANSWER =====
+function sendAnswer(fromMic) {
+  const input = $('answerInput');
+  const text = fromMic || input.value.trim();
+  if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+  ws.send(JSON.stringify({ type: 'answer', transcript: text, pause_ms: 0 }));
+  addMsg('witness', text, { fromMic: !!fromMic });
+  if (!fromMic) { input.value = ''; input.focus(); }
+  showTyping(true);
+}
+
+$('sendBtn').addEventListener('click', () => sendAnswer());
+$('answerInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAnswer(); }
+});
+
+// ===== MICROPHONE =====
+async function toggleMic() {
+  if (micActive) {
+    stopMic();
+    return;
+  }
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    addMsg('system', 'Speech recognition not available in this browser. Try Chrome.');
+    return;
+  }
+
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      let final = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          final += event.results[i][0].transcript + ' ';
+        }
+      }
+      if (final.trim()) {
+        sendAnswer(final.trim());
+      }
+    };
+
+    recognition.onerror = (event) => {
+      if (event.error !== 'no-speech') {
+        addMsg('system', `Mic error: ${event.error}`);
+        stopMic();
+      }
+    };
+
+    recognition.start();
+    micActive = true;
+    $('micBtn').textContent = '🎙';
+    $('micBtn').classList.add('active-mic');
+    $('micBtn').title = 'Stop microphone';
+    addMsg('system', 'Microphone active — speak your answers.');
+  } catch (e) {
+    addMsg('system', `Mic access denied: ${e.message}`);
+  }
+}
+
+function stopMic() {
+  if (recognition) { recognition.stop(); recognition = null; }
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  micActive = false;
+  $('micBtn').textContent = '🎤';
+  $('micBtn').classList.remove('active-mic');
+  $('micBtn').title = 'Start microphone';
+}
+
+$('micBtn').addEventListener('click', toggleMic);
+
+// ===== TTS TOGGLE =====
+$('speakerBtn').addEventListener('click', () => {
+  ttsEnabled = !ttsEnabled;
+  $('speakerBtn').textContent = ttsEnabled ? '🔊' : '🔇';
+  if (!ttsEnabled) speechSynthesis.cancel();
+});
+
+// ===== SESSION CONTROLS =====
+$('pauseBtn').addEventListener('click', async () => {
+  if (!currentSessionId) return;
+  const resp = await fetch(`/session/${currentSessionId}/pause?token=${getToken()}`, { method: 'POST' });
+  if (resp.ok) {
+    $('sessionStatus').textContent = 'paused';
+    $('sessionStatus').className = 'badge paused';
+    $('pauseBtn').classList.add('hidden');
+    $('resumeBtn').classList.remove('hidden');
+    $('answerInput').disabled = true;
+    $('sendBtn').disabled = true;
+    addMsg('system', 'Cross-examination paused.');
+  }
+});
+
+$('resumeBtn').addEventListener('click', async () => {
+  if (!currentSessionId) return;
+  const resp = await fetch(`/session/${currentSessionId}/resume?token=${getToken()}`, { method: 'POST' });
+  if (resp.ok) {
+    $('sessionStatus').textContent = 'active';
+    $('sessionStatus').className = 'badge active';
+    $('pauseBtn').classList.remove('hidden');
+    $('resumeBtn').classList.add('hidden');
+    $('answerInput').disabled = false;
+    $('sendBtn').disabled = false;
+    connectWS(currentSessionId);
+    addMsg('system', 'Cross-examination resumed.');
+  }
+});
+
+$('endBtn').addEventListener('click', async () => {
+  if (!currentSessionId) return;
+  const resp = await fetch(`/session/${currentSessionId}/scorecard?token=${getToken()}`);
+  if (resp.ok) {
+    stopMic();
+    disconnectWS();
+    if (scorecardTimer) { clearInterval(scorecardTimer); scorecardTimer = null; }
+    $('sessionStatus').textContent = 'completed';
+    $('sessionStatus').className = 'badge';
+    $('pauseBtn').classList.add('hidden');
+    $('resumeBtn').classList.add('hidden');
+    $('endBtn').classList.add('hidden');
+    $('answerInput').disabled = true;
+    $('sendBtn').disabled = true;
+    await refreshScorecard(currentSessionId);
+    addMsg('system', 'Session finalized. Scorecard ready.');
+  }
+});
+
+// ===== SCORECARD =====
 async function refreshScorecard(sid) {
   if (!sid) return;
   try {
-    // Try snapshot first (doesn't finalize), fall back to scorecard
     let resp = await fetch(`/session/${sid}/snapshot?token=${getToken()}`);
-    if (!resp.ok) {
-      resp = await fetch(`/session/${sid}/scorecard?token=${getToken()}`);
-    }
+    if (!resp.ok) resp = await fetch(`/session/${sid}/scorecard?token=${getToken()}`);
     if (!resp.ok) return;
     const sc = await resp.json();
-    $('risk').textContent = sc.credibility_risk;
+    $('riskLevel').textContent = sc.credibility_risk;
     $('entryCount').textContent = sc.entries.length;
-    const container = $('scorecardEntries');
-    container.innerHTML = '';
-    if (sc.entries.length === 0) {
-      container.innerHTML = '<div style="color:var(--text-dim);font-size:11px;text-align:center;padding:8px 0">No entries yet</div>';
+    const c = $('scorecardEntries');
+    c.innerHTML = '';
+    if (!sc.entries.length) {
+      c.innerHTML = '<div style="color:var(--text-dim);font-size:11px;text-align:center;padding:8px">No entries yet</div>';
       return;
     }
     for (const e of sc.entries) {
-      const div = document.createElement('div');
-      div.className = 'scorecard-entry';
-      div.innerHTML = `
-        <span class="sev ${e.severity}">${e.severity}</span>
-        <div style="margin:2px 0">${e.description}</div>
-        ${e.witness_answer ? `<div style="color:var(--text-dim);font-size:11px">"${e.witness_answer.slice(0,60)}${e.witness_answer.length > 60 ? '...' : ''}"</div>` : ''}
-      `;
-      container.appendChild(div);
+      c.innerHTML += `<div class="scorecard-entry"><span class="sev ${e.severity}">${e.severity}</span> ${e.description}</div>`;
     }
   } catch (_) {}
 }
 
 function startScorecardPoll(sid) {
-  if (scorecardTimer) { clearInterval(scorecardTimer); scorecardTimer = null; }
+  if (scorecardTimer) clearInterval(scorecardTimer);
   refreshScorecard(sid);
   scorecardTimer = setInterval(() => {
     if (currentSessionId === sid) refreshScorecard(sid);
@@ -459,185 +701,26 @@ function startScorecardPoll(sid) {
   }, 3000);
 }
 
-// --- Send answer ---
-function sendAnswer() {
-  const text = $('answerInput').value.trim();
-  if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
-  ws.send(JSON.stringify({ type: 'answer', transcript: text, pause_ms: 0 }));
-  addMessage('witness', text);
-  $('answerInput').value = '';
-  $('answerInput').focus();
-  showTyping(true);
-}
-
-// --- Session lifecycle ---
-async function createSession() {
-  $('createBtn').disabled = true;
-  $('createBtn').textContent = 'Creating...';
-  setGlobalStatus('creating...', 'waiting');
-  try {
-    // First check if test_case.txt exists; fall back to path from context
-    const paths = ['test_case.txt'];
-    const resp = await fetch(`/session/create?token=${getToken()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(paths),
-    });
-    if (!resp.ok) {
-      const err = await resp.json();
-      addMessage('system', `Create failed: ${err.detail}`);
-      setGlobalStatus('error', 'error');
-      return;
-    }
-    const data = await resp.json();
-    sessions[data.session_id] = {
-      status: 'active',
-      case_title: data.case_title || '',
-      turn_number: 0,
-      room: data.room,
-    };
-    renderSessionList();
-    await selectSession(data.session_id);
-    setGlobalStatus('connected', 'active');
-  } catch (e) {
-    addMessage('system', `Connection error: ${e.message}`);
-    setGlobalStatus('error', 'error');
-  } finally {
-    $('createBtn').disabled = false;
-    $('createBtn').textContent = '+ New Session';
-  }
-}
-
-async function pauseSession() {
-  if (!currentSessionId) return;
-  try {
-    const resp = await fetch(`/session/${currentSessionId}/pause?token=${getToken()}`, { method: 'POST' });
-    if (resp.ok) {
-      sessions[currentSessionId].status = 'paused';
-      renderSessionList();
-      $('chatStatus').textContent = 'paused';
-      $('chatStatus').className = 'badge paused';
-      $('pauseBtn').classList.add('hidden');
-      $('resumeBtn').classList.remove('hidden');
-      $('answerInput').disabled = true;
-      $('sendBtn').disabled = true;
-      addMessage('system', 'Session paused.');
-    }
-  } catch (e) {
-    addMessage('system', `Pause failed: ${e.message}`);
-  }
-}
-
-async function resumeSession() {
-  if (!currentSessionId) return;
-  try {
-    const resp = await fetch(`/session/${currentSessionId}/resume?token=${getToken()}`, { method: 'POST' });
-    if (resp.ok) {
-      sessions[currentSessionId].status = 'active';
-      renderSessionList();
-      $('chatStatus').textContent = 'active';
-      $('chatStatus').className = 'badge active';
-      $('pauseBtn').classList.remove('hidden');
-      $('resumeBtn').classList.add('hidden');
-      connectWS(currentSessionId);
-      addMessage('system', 'Session resumed.');
-    }
-  } catch (e) {
-    addMessage('system', `Resume failed: ${e.message}`);
-  }
-}
-
-async function endSession() {
-  if (!currentSessionId) return;
-  try {
-    const resp = await fetch(`/session/${currentSessionId}/scorecard?token=${getToken()}`, { method: 'GET' });
-    if (resp.ok) {
-      sessions[currentSessionId].status = 'completed';
-      renderSessionList();
-      $('chatStatus').textContent = 'completed';
-      $('chatStatus').className = 'badge completed';
-      $('chatControls').style.display = 'none';
-      disconnectWS();
-      $('answerInput').disabled = true;
-      $('sendBtn').disabled = true;
-      if (scorecardTimer) { clearInterval(scorecardTimer); scorecardTimer = null; }
-      await refreshScorecard(currentSessionId);
-      addMessage('system', 'Session finalized. Scorecard ready.');
-    }
-  } catch (e) {
-    addMessage('system', `Finalize failed: ${e.message}`);
-  }
-}
-
-async function destroySession() {
-  if (!currentSessionId) return;
-  if (!confirm('Permanently destroy this session?')) return;
-  try {
-    await fetch(`/session/${currentSessionId}/destroy?token=${getToken()}`, { method: 'POST' });
-    delete sessions[currentSessionId];
-    disconnectWS();
-    if (scorecardTimer) { clearInterval(scorecardTimer); scorecardTimer = null; }
-    currentSessionId = null;
-    renderSessionList();
-    $('messages').innerHTML = '<div class="msg system">Session destroyed. Create a new one to begin.</div>';
-    $('chatTitle').textContent = 'Select a session';
-    $('chatStatus').textContent = '—';
-    $('chatStatus').className = 'badge';
-    $('chatControls').style.display = 'none';
-    $('answerInput').disabled = true;
-    $('sendBtn').disabled = true;
-    // Reset sidebar
-    $('sid').textContent = '—';
-    $('room').textContent = '—';
-    $('sstatus').textContent = '—';
-    $('turn').textContent = '0';
-    $('caseTitle').textContent = '—';
-    $('exhibitList').innerHTML = '';
-    $('risk').textContent = '—';
-    $('entryCount').textContent = '0';
-    $('scorecardEntries').innerHTML = '';
-    setGlobalStatus('ready', '');
-  } catch (e) {
-    addMessage('system', `Destroy failed: ${e.message}`);
-  }
-}
-
-// --- Refresh session list from server ---
-async function refreshSessionList() {
-  try {
-    const resp = await fetch(`/sessions?token=${getToken()}`);
-    if (!resp.ok) return;
-    const list = await resp.json();
-    // Merge server data into local state
-    for (const s of list) {
-      if (!sessions[s.session_id]) {
-        sessions[s.session_id] = {};
-      }
-      sessions[s.session_id] = { ...sessions[s.session_id], ...s };
-    }
-    // Remove sessions no longer on server (completed/destroyed)
-    const serverIds = new Set(list.map(s => s.session_id));
-    for (const id of Object.keys(sessions)) {
-      if (!serverIds.has(id)) delete sessions[id];
-    }
-    renderSessionList();
-  } catch (_) {}
-}
-
-// --- Event listeners ---
-$('createBtn').addEventListener('click', createSession);
-$('pauseBtn').addEventListener('click', pauseSession);
-$('resumeBtn').addEventListener('click', resumeSession);
-$('endBtn').addEventListener('click', endSession);
-$('destroyBtn').addEventListener('click', destroySession);
-$('sendBtn').addEventListener('click', sendAnswer);
-$('answerInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAnswer(); }
+// ===== NAV =====
+$('newCaseBtn').addEventListener('click', () => {
+  stopMic();
+  disconnectWS();
+  if (scorecardTimer) { clearInterval(scorecardTimer); scorecardTimer = null; }
+  currentSessionId = null;
+  $('chatView').classList.add('hidden');
+  $('uploadView').classList.remove('hidden');
+  $('newCaseBtn').classList.add('hidden');
+  $('caseBadge').classList.add('hidden');
+  $('endBtn').classList.add('hidden');
+  $('messages').innerHTML = '<div class="msg system">Upload a case file to begin.</div>';
+  status('ready', '');
 });
 
-// Poll session list every 5s
-setInterval(refreshSessionList, 5000);
-refreshSessionList();
+$('uploadBtnHeader').addEventListener('click', () => fileInput.click());
+
+// ===== INIT =====
+showRecentCases();
+status('ready', '');
 </script>
 </body>
 </html>
