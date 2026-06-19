@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --config /etc/livekit.yaml
+    ports:
+      - "7880:7880"   # HTTP
+      - "7881:7881"   # WebRTC UDP
+      - "7882:7882"   # TURN TCP
+    volumes:
+      - ../config/livekit.yaml:/etc/livekit.yaml
+    restart: unless-stopped
