@@ -54,6 +54,7 @@ class Settings:
             self.cors_origins = ["*"]
 
         self.log_dir: Path = Path(os.getenv("WITNESS_PREP_LOG_DIR", str(PROJECT_ROOT / "data" / "sessions")))
+        self.frontend_dir: Path = PROJECT_ROOT / "frontend"
 
 
 # Module-level singleton — import `settings` anywhere, it's always current.

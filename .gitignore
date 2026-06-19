@@ -33,3 +33,4 @@ livekit-server.exe
 
 # Pytest
 .pytest_cache/
+.env

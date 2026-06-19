@@ -43,3 +43,9 @@
 {"turn": 1, "timestamp": "2026-06-19T03:24:21.509744+00:00", "speaker": "witness", "text": "I saw him", "metadata": {"pause_ms": 100, "partial": true}}
 {"turn": 2, "timestamp": "2026-06-19T03:24:21.514251+00:00", "speaker": "witness", "text": " at the scene", "metadata": {"pause_ms": 100, "partial": true}}
 {"turn": 3, "timestamp": "2026-06-19T03:24:21.517254+00:00", "speaker": "witness", "text": " that night", "metadata": {"pause_ms": 100, "partial": true}}
+{"turn": 1, "timestamp": "2026-06-19T03:43:06.017877+00:00", "speaker": "witness", "text": "I saw him", "metadata": {"pause_ms": 100, "partial": true}}
+{"turn": 2, "timestamp": "2026-06-19T03:43:06.020877+00:00", "speaker": "witness", "text": " at the scene", "metadata": {"pause_ms": 100, "partial": true}}
+{"turn": 3, "timestamp": "2026-06-19T03:43:06.023387+00:00", "speaker": "witness", "text": " that night", "metadata": {"pause_ms": 100, "partial": true}}
+{"turn": 1, "timestamp": "2026-06-19T03:51:12.458637+00:00", "speaker": "witness", "text": "I saw him", "metadata": {"pause_ms": 100, "partial": true}}
+{"turn": 2, "timestamp": "2026-06-19T03:51:12.462635+00:00", "speaker": "witness", "text": " at the scene", "metadata": {"pause_ms": 100, "partial": true}}
+{"turn": 3, "timestamp": "2026-06-19T03:51:12.464644+00:00", "speaker": "witness", "text": " that night", "metadata": {"pause_ms": 100, "partial": true}}

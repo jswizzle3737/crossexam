@@ -17,7 +17,8 @@ from time import monotonic
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from backend.config import settings
@@ -124,6 +125,9 @@ app.add_middleware(
 app.add_middleware(AuthMiddleware)
 app.add_middleware(RateLimitMiddleware)
 
+# Serve frontend static assets
+app.mount("/static", StaticFiles(directory=str(settings.frontend_dir), html=True), name="frontend")
+
 
 # ---------------------------------------------------------------------------
 # Routes
@@ -132,7 +136,7 @@ app.add_middleware(RateLimitMiddleware)
 
 @app.get("/")
 async def root():
-    return RedirectResponse(url="/docs")
+    return FileResponse(settings.frontend_dir / "index.html")
 
 
 @app.get("/health")
