@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      WITNESS_PREP_API_KEYS: ci-value
+      CORS_ORIGINS: http://127.0.0.1:8000,http://localhost:8000
+      LIVEKIT_HOST: localhost
+      LIVEKIT_PORT: "7880"
+      LIVEKIT_API_KEY: ci-value
+      LIVEKIT_API_SECRET: ci-value
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r requirements.txt
+      - run: pytest -q
