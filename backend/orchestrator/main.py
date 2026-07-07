@@ -3,7 +3,7 @@
 Credentials for the LiveKit gateway are read from ``backend.config.settings`` (``.env``).
 
 Middleware stack (applied top-to-bottom):
-1. CORS — permissive in dev, locked in prod (via ``CORS_ORIGINS`` env)
+1. CORS — explicit allowed origins only (via ``CORS_ORIGINS`` env)
 2. Auth — Bearer token validated on every request except public paths
 3. Rate limiting — token-bucket per API key
 """
@@ -13,11 +13,12 @@ from __future__ import annotations
 import uuid
 from collections import defaultdict
 from contextlib import asynccontextmanager
+from pathlib import Path
 from time import monotonic
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -27,6 +28,9 @@ from backend.orchestrator.session_manager import SessionManager
 
 _manager: SessionManager | None = None
 ingestor = CaseIngestor()
+
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+ALLOWED_UPLOAD_SUFFIXES = {".txt", ".md"}
 
 
 def get_manager() -> SessionManager:
@@ -39,6 +43,30 @@ def get_manager() -> SessionManager:
             gateway_api_secret=settings.livekit_api_secret,
         )
     return _manager
+
+
+def upload_root() -> Path:
+    root = (settings.data_dir / "uploads").resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+
+def resolve_uploaded_file(file_id: str) -> Path:
+    """Resolve a stored upload ID without allowing path traversal."""
+    if not file_id or Path(file_id).name != file_id:
+        raise HTTPException(400, "Invalid file ID")
+
+    root = upload_root()
+    path = (root / file_id).resolve()
+    try:
+        path.relative_to(root)
+    except ValueError:
+        raise HTTPException(400, "Invalid file ID")
+
+    if not path.is_file():
+        raise HTTPException(404, "Uploaded file not found")
+
+    return path
 
 
 # ---------------------------------------------------------------------------
@@ -85,9 +113,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if path in PUBLIC_PATHS:
             return await call_next(request)
 
-        # Use client IP or API key as identity
         token = request.query_params.get("token") or request.headers.get("authorization", "")
-        identity = token or request.client.host if request.client else "unknown"
+        identity = token or (request.client.host if request.client else "unknown")
 
         now = monotonic()
         bucket = self._buckets[identity]
@@ -152,24 +179,30 @@ async def health():
 
 @app.post("/case/upload")
 async def upload_case(file: UploadFile):
-    """Upload a case file (txt, pdf, docx). Saves, ingests, returns case context."""
+    """Upload a plain-text or markdown case file. Returns an opaque file ID."""
     import aiofiles
-    import os
-    upload_dir = settings.data_dir / "uploads"
-    upload_dir.mkdir(parents=True, exist_ok=True)
 
-    safe_name = file.filename.replace("\\", "_").replace("/", "_")
-    save_path = upload_dir / safe_name
+    original_name = file.filename or "upload.txt"
+    suffix = Path(original_name).suffix.lower()
+    if suffix not in ALLOWED_UPLOAD_SUFFIXES:
+        raise HTTPException(400, "Unsupported file type. Upload .txt or .md only.")
 
-    content = await file.read()
+    content = await file.read(MAX_UPLOAD_BYTES + 1)
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, "File is too large. Maximum size is 10 MB.")
+    if not content.strip():
+        raise HTTPException(400, "Uploaded file is empty.")
+
+    file_id = f"{uuid.uuid4().hex}{suffix}"
+    save_path = upload_root() / file_id
+
     async with aiofiles.open(save_path, "wb") as f:
         await f.write(content)
 
-    # Ingest
     context = ingestor.ingest([str(save_path)])
     return {
-        "filename": safe_name,
-        "path": str(save_path),
+        "filename": original_name,
+        "file_id": file_id,
         "case_id": context.case_id,
         "exhibits": [{"id": e.id, "description": e.description} for e in context.exhibits],
         "statements": [{"witness": s.witness_id, "text": s.statement_text[:200]} for s in context.witness_statements],
@@ -178,13 +211,13 @@ async def upload_case(file: UploadFile):
 
 
 @app.post("/session/create")
-async def create_session(case_file_paths: list[str]):
-    """Create a new cross-examination session.
+async def create_session(case_file_ids: list[str]):
+    """Create a new cross-examination session from previously uploaded file IDs.
 
-    Accepts case file paths, ingests them, provisions a LiveKit room, and
-    returns the session ID, room name, and JWT token.
+    Raw server file paths are intentionally not accepted.
     """
-    context = ingestor.ingest(case_file_paths)
+    file_paths = [str(resolve_uploaded_file(file_id)) for file_id in case_file_ids]
+    context = ingestor.ingest(file_paths)
     session_id = f"ses_{uuid.uuid4().hex[:8]}"
     session = await get_manager().create_session(
         session_id=session_id,
@@ -320,7 +353,6 @@ async def transcript_stream(websocket: WebSocket, session_id: str):
       S->C  {"type": "question", "text": "...", "strategy": "..."}
       S->C  {"type": "error", "code": "SESSION_NOT_FOUND"}
     """
-    # Auth check on handshake (before accept)
     ws_token = websocket.query_params.get("token", "")
     if ws_token not in settings.api_keys:
         await websocket.close(code=4001)
@@ -331,7 +363,7 @@ async def transcript_stream(websocket: WebSocket, session_id: str):
         try:
             data = await websocket.receive_json()
         except Exception:
-            break  # Client disconnected
+            break
 
         if data.get("type") != "answer":
             await websocket.send_json({"type": "error", "code": "INVALID_TYPE"})
