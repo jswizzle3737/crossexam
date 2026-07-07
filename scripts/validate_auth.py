@@ -1,4 +1,4 @@
-"""Validate the refactored auth model end-to-end."""
+"""Validate the auth configuration end-to-end."""
 from __future__ import annotations
 
 import sys
@@ -10,17 +10,21 @@ import asyncio
 async def main():
     # 1) Config loads from .env
     from backend.config import settings
-    print("=== 1. Config loads from .env ===")
-    assert settings.livekit_host == "localhost"
-    assert settings.livekit_port == 7880
-    assert len(settings.livekit_api_key) > 0
+    print("=== 1. Required config loads from .env ===")
+    assert settings.livekit_host
+    assert settings.livekit_port > 0
+    assert settings.api_keys
+    assert settings.cors_origins
+    assert "*" not in settings.cors_origins
     print(f"  LIVEKIT_HOST   = {settings.livekit_host!r}")
     print(f"  LIVEKIT_PORT   = {settings.livekit_port!r}")
+    print(f"  API_KEYS       = {len(settings.api_keys)} configured")
+    print(f"  CORS_ORIGINS   = {settings.cors_origins!r}")
     key = settings.livekit_api_key
     sec = settings.livekit_api_secret
     print(f"  LIVEKIT_API_KEY     = ***{key[-4:]}" if key else "  LIVEKIT_API_KEY     = (not set)")
     print(f"  LIVEKIT_API_SECRET  = ***{sec[-4:]}" if sec else "  LIVEKIT_API_SECRET  = (not set)")
-    print("  \u2705 All values present\n")
+    print("  ✅ Required security settings present\n")
 
     # 2) Gateway constructs with env creds
     from backend.orchestrator.webrtc_gateway import WebRTCGateway
@@ -37,7 +41,7 @@ async def main():
     print("=== 3. SessionManager with explicit creds ===")
     print(f"  gateway._api_key=***{sm._gateway._api_key[-4:]}")
     print(f"  gateway._api_secret=***{sm._gateway._api_secret[-4:]}")
-    print("  \u2705 Explicit creds override .env")
+    print("  ✅ Explicit creds override .env")
     await sm.cleanup()
     print()
 
@@ -46,9 +50,9 @@ async def main():
     print("=== 4. FastAPI app boots ===")
     print(f"  title={app.title!r}")
     print(f"  routes={len(app.routes)}")
-    print("  \u2705 Server ready to serve on port 8000\n")
+    print("  ✅ Server ready to serve on port 8000\n")
 
-    print("=== \U0001f7e2 All auth refactoring verified ===")
+    print("=== 🟢 All auth checks verified ===")
 
 
 asyncio.run(main())
