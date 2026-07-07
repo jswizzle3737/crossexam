@@ -9,8 +9,8 @@ Environment variables (set in .env at project root):
     LIVEKIT_PORT           - LiveKit server port      (default: 7880)
     LIVEKIT_API_KEY        - LiveKit API key
     LIVEKIT_API_SECRET     - LiveKit API secret
-    WITNESS_PREP_API_KEYS  - Comma-separated API keys (default: dev-key)
-    CORS_ORIGINS           - Comma-separated allowed origins (default: *)
+    WITNESS_PREP_API_KEYS  - Comma-separated API keys (required)
+    CORS_ORIGINS           - Comma-separated allowed origins (required)
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ class Settings:
         raw_keys = os.getenv("WITNESS_PREP_API_KEYS", "")
         self.api_keys: set[str] = {k.strip() for k in raw_keys.split(",") if k.strip()}
         if not self.api_keys:
-            self.api_keys = {"dev-key"}
+            raise RuntimeError("WITNESS_PREP_API_KEYS must be configured")
 
         # OpenRouter (LLM inference)
         self.openrouter_api_key: str = os.getenv("OPENROUTER_API_KEY", "")
@@ -48,10 +48,10 @@ class Settings:
         self.openrouter_model: str = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
 
         # CORS
-        raw_origins = os.getenv("CORS_ORIGINS", "*")
+        raw_origins = os.getenv("CORS_ORIGINS", "")
         self.cors_origins: list[str] = [o.strip() for o in raw_origins.split(",") if o.strip()]
-        if not self.cors_origins:
-            self.cors_origins = ["*"]
+        if not self.cors_origins or "*" in self.cors_origins:
+            raise RuntimeError("CORS_ORIGINS must be explicitly configured and cannot be '*'")
 
         self.log_dir: Path = Path(os.getenv("WITNESS_PREP_LOG_DIR", str(PROJECT_ROOT / "data" / "sessions")))
         self.data_dir: Path = PROJECT_ROOT / "data"
