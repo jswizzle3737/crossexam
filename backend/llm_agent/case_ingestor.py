@@ -1,8 +1,12 @@
 """Ingests criminal case files and extracts structured evidence / contradictions."""
 
 from dataclasses import dataclass, field
-from typing import List, Optional
+from pathlib import Path
+from typing import List
 import re
+
+
+MAX_CASE_FILE_BYTES = 10 * 1024 * 1024
 
 
 @dataclass
@@ -55,8 +59,12 @@ class CaseIngestor:
         return context
 
     def _read_file(self, path: str) -> str:
-        with open(path) as f:
-            return f.read()
+        target = Path(path)
+        if not target.is_file():
+            raise FileNotFoundError(f"Case file not found: {target.name}")
+        if target.stat().st_size > MAX_CASE_FILE_BYTES:
+            raise ValueError("Case file exceeds the 10 MB processing limit")
+        return target.read_text(encoding="utf-8", errors="replace")
 
     def _extract_statements(self, text: str) -> List[WitnessStatement]:
         lines = [l for l in text.split("\n") if l.strip()]
@@ -65,7 +73,7 @@ class CaseIngestor:
     def _extract_exhibits(self, text: str, source: str) -> List[Exhibit]:
         exhibits = []
         for match in re.finditer(r"Exhibit\s+(\d+)\s*[:\-–]\s*(.+)", text, re.IGNORECASE):
-            exhibits.append(Exhibit(id=match.group(1), description=match.group(2).strip(), source_file=source))
+            exhibits.append(Exhibit(id=match.group(1), description=match.group(2).strip(), source_file=Path(source).name))
         return exhibits
 
     def _find_contradictions(self, statements: List[WitnessStatement]) -> List[dict]:
