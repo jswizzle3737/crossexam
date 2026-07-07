@@ -11,8 +11,14 @@ venv/
 env/
 
 # Environment
-.env
+.env*
 !.env.example
+
+# Runtime data
+data/uploads/
+data/sessions/
+logs/
+*.log
 
 # IDE
 .vscode/
@@ -24,13 +30,8 @@ env/
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-logs/
-
 # Binary
 livekit-server.exe
 
 # Pytest
 .pytest_cache/
-.env
