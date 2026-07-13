@@ -10,15 +10,17 @@ build/
 venv/
 env/
 
-# Environment
+# Environment and local configuration
 .env*
 !.env.example
+config/livekit.local.yaml
 
 # Runtime data
 data/uploads/
 data/sessions/
 logs/
 *.log
+.livekit.pid
 
 # IDE
 .vscode/
@@ -35,3 +37,5 @@ livekit-server.exe
 
 # Pytest
 .pytest_cache/
+.coverage
+htmlcov/

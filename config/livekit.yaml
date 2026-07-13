@@ -1,3 +1,6 @@
+# Local LiveKit server configuration.
+# API credentials are supplied at runtime through LIVEKIT_KEYS.
+# Do not add real keys or secrets to this file.
 port: 7880
 bind_addresses:
   - "0.0.0.0"
@@ -5,7 +8,5 @@ rtc:
   port_range_start: 7881
   port_range_end: 7882
   udp_port: 7881
-keys:
-  devkey: "secretdevkey123"
 logging:
   level: info
