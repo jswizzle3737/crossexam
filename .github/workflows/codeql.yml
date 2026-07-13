@@ -2,9 +2,9 @@ name: CodeQL
 
 on:
   push:
-    branches: ["master"]
+    branches: ["master", "main"]
   pull_request:
-    branches: ["master"]
+    branches: ["master", "main"]
   schedule:
     - cron: "36 7 * * 1"
   workflow_dispatch:
@@ -13,16 +13,25 @@ permissions:
   contents: read
   security-events: write
 
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analyze:
     name: Analyze Python
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    timeout-minutes: 20
 
-      - uses: github/codeql-action/init@v3
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
         with:
           languages: python
           queries: security-and-quality
 
-      - uses: github/codeql-action/analyze@v3
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
