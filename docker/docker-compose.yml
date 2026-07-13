@@ -1,12 +1,14 @@
-version: "3.9"
 services:
   livekit:
     image: livekit/livekit-server:latest
     command: --config /etc/livekit.yaml
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:?Set LIVEKIT_API_KEY in .env}: ${LIVEKIT_API_SECRET:?Set LIVEKIT_API_SECRET in .env}"
     ports:
-      - "7880:7880"   # HTTP
-      - "7881:7881"   # WebRTC UDP
-      - "7882:7882"   # TURN TCP
+      - "127.0.0.1:7880:7880/tcp"
+      - "127.0.0.1:7881:7881/tcp"
+      - "127.0.0.1:7881:7881/udp"
+      - "127.0.0.1:7882:7882/tcp"
     volumes:
-      - ../config/livekit.yaml:/etc/livekit.yaml
+      - ../config/livekit.yaml:/etc/livekit.yaml:ro
     restart: unless-stopped
