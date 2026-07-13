@@ -1,8 +1,10 @@
 # CrossExam
 
-An experimental, voice-enabled cross-examination training platform for witnesses and legal advocates.
+A retained FastAPI/LiveKit experiment for real-time, voice-enabled cross-examination training.
 
-CrossExam combines a FastAPI backend, LiveKit-based real-time communication, structured case ingestion, adversarial questioning, session controls, and post-session scoring. The repository is an active prototype, not a production legal service.
+> **Project role:** The canonical user-facing product is [`jswizzle3737/Crossed`](https://github.com/jswizzle3737/Crossed). This repository is maintained as a technical reference for real-time media, session orchestration, WebSocket transport, VAD, and scorecard infrastructure. Do not split ordinary product development between both repositories.
+
+CrossExam is an active technical prototype, not a production legal service.
 
 ## Current capabilities
 
@@ -35,7 +37,7 @@ tests/                   Automated tests
 
 - Python 3.11 or newer
 - Docker Desktop or Docker Engine with Compose
-- A LiveKit API key and secret
+- A generated LiveKit API key and secret
 - An OpenRouter API key when using hosted model inference
 
 ## Local setup
@@ -117,7 +119,7 @@ Protected HTTP endpoints require one of the values configured in `WITNESS_PREP_A
 Authorization: Bearer YOUR_APPLICATION_API_KEY
 ```
 
-Browser WebSocket clients pass the application API key through the documented `token` query parameter. Do not place production credentials in public URLs, logs, screenshots, or client-side source code.
+Browser WebSocket clients currently pass the application API key through the documented `token` query parameter. Treat this as a development mechanism only because URLs may be logged. A production implementation should use a short-lived exchange or another header/cookie-based authenticated handshake.
 
 ## Tests
 
@@ -125,19 +127,22 @@ Browser WebSocket clients pass the application API key through the documented `t
 pytest -q
 ```
 
-Some LiveKit integration tests require the local LiveKit container to be running.
+Some LiveKit integration tests require the local LiveKit container.
 
-## Security notes
+## Security and data handling
 
 - Never commit `.env`, provider keys, session data, uploaded evidence, or production LiveKit configuration.
 - Treat uploaded case material as confidential.
 - The included in-memory rate limiter is suitable for local development, not a distributed production deployment.
-- Use HTTPS/WSS, durable authentication, external rate limiting, encrypted storage, and a formal retention policy before handling real client or witness material.
+- Use HTTPS/WSS, durable authentication, external rate limiting, encrypted storage, and a formal retention policy before handling real material.
 - Rotate any credential that has been committed or shared outside its intended environment.
+- Follow [`docs/DATA_RETENTION.md`](docs/DATA_RETENTION.md) for temporary uploads, transcripts, scorecards, and deletion behaviour.
 
-## Project status
+## Development direction
 
-The detailed build plan is preserved in [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md). Some planned components remain experimental or incomplete. Verify actual code and test coverage before relying on a roadmap item.
+The current roadmap is in [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md). Infrastructure should be promoted into `Crossed` only when it solves a current requirement and justifies the additional operational burden.
+
+Contribution and migration rules are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Legal use
 
