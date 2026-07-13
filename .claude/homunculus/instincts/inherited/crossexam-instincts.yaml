@@ -1,0 +1,329 @@
+# Instincts generated from https://github.com/jswizzle3737/crossexam
+# Generated: 2026-07-13T03:33:51.511Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: crossexam-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/jswizzle3737/crossexam
+---
+
+# Crossexam Commit Length
+
+## Action
+
+Write moderate-length commit messages (~50 characters)
+
+## Evidence
+
+- Average commit message length: 50 chars
+- Based on 6 commits
+
+---
+id: crossexam-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/jswizzle3737/crossexam
+---
+
+# Crossexam Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: crossexam-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/jswizzle3737/crossexam
+---
+
+# Crossexam Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: crossexam-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/jswizzle3737/crossexam
+---
+
+# Crossexam Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: crossexam-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/jswizzle3737/crossexam
+---
+
+# Crossexam Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: crossexam-workflow-secure-credentials-management
+trigger: "when doing secure credentials management"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/jswizzle3737/crossexam
+---
+
+# Crossexam Workflow Secure Credentials Management
+
+## Action
+
+Follow the secure-credentials-management workflow:
+1. Remove sensitive credentials from committed configuration files.
+2. Update scripts or configuration to load credentials from environment variables.
+3. Update environment template files to document required variables.
+4. Update .gitignore to exclude local runtime or credential files.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: config/*.yaml, scripts/*.sh, .env.example
+
+---
+id: crossexam-instinct-camelcase-files
+trigger: "When creating or renaming a file in the codebase"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: jswizzle3737/crossexam
+---
+
+# Crossexam Instinct Camelcase Files
+
+## Action
+
+Use camelCase for file names
+
+## Evidence
+
+- Pattern in namingConventions.files
+- No evidence of snake_case or kebab-case file names
+
+---
+id: crossexam-instinct-camelcase-functions
+trigger: "When defining a function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: jswizzle3737/crossexam
+---
+
+# Crossexam Instinct Camelcase Functions
+
+## Action
+
+Name the function using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.functions
+
+---
+id: crossexam-instinct-pascalcase-classes
+trigger: "When defining a class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: jswizzle3737/crossexam
+---
+
+# Crossexam Instinct Pascalcase Classes
+
+## Action
+
+Name the class using PascalCase
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: crossexam-instinct-screaming-constants
+trigger: "When defining a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: jswizzle3737/crossexam
+---
+
+# Crossexam Instinct Screaming Constants
+
+## Action
+
+Name the constant using SCREAMING_SNAKE_CASE
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: crossexam-instinct-relative-imports
+trigger: "When importing modules within the codebase"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: jswizzle3737/crossexam
+---
+
+# Crossexam Instinct Relative Imports
+
+## Action
+
+Use relative import paths
+
+## Evidence
+
+- Pattern in importStyle: relative
+
+---
+id: crossexam-instinct-named-exports
+trigger: "When exporting functions, classes, or constants"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: jswizzle3737/crossexam
+---
+
+# Crossexam Instinct Named Exports
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle: named
+
+---
+id: crossexam-instinct-test-location-separate
+trigger: "When adding or organizing tests"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: jswizzle3737/crossexam
+---
+
+# Crossexam Instinct Test Location Separate
+
+## Action
+
+Place test files in a separate location from source files
+
+## Evidence
+
+- Pattern in architecture.testLocation: separate
+
+---
+id: crossexam-instinct-commit-prefix
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: jswizzle3737/crossexam
+---
+
+# Crossexam Instinct Commit Prefix
+
+## Action
+
+Prefix the commit message with a type such as 'security', 'docs', or 'chore'
+
+## Evidence
+
+- Seen in commit: 'docs: add project README and safe local setup'
+- Seen in commit: 'security: remove committed LiveKit credentials'
+- Pattern in commits.prefixes
+
+---
+id: crossexam-instinct-commit-length
+trigger: "When composing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: jswizzle3737/crossexam
+---
+
+# Crossexam Instinct Commit Length
+
+## Action
+
+Keep the commit message concise, around 50 characters
+
+## Evidence
+
+- Pattern in commits.averageLength: 50
+
+---
+id: crossexam-instinct-secure-credentials-management
+trigger: "When sensitive credentials (e.g., API keys) are found committed or exposed"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: jswizzle3737/crossexam
+---
+
+# Crossexam Instinct Secure Credentials Management
+
+## Action
+
+Remove credentials from committed files, load them from environment variables, update environment templates, and update .gitignore to exclude local credential files
+
+## Evidence
+
+- Workflow: secure-credentials-management
+- Seen in commit: 'security: remove committed LiveKit credentials'
+- Seen in commit: 'security: inject LiveKit keys and limit local port exposure'
+- Seen in commit: 'security: load LiveKit credentials from local environment'
+- Seen in commit: 'docs: complete environment configuration template'
+- Pattern in workflow.commitSequence
+
